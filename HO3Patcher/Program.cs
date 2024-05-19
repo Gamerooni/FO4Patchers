@@ -38,6 +38,14 @@ namespace HO3Patcher
             return matcherOperations.MatchArmor(armor);
         }
 
+        /// <summary>
+        /// Adds a float property <paramref name="propName"/> with value <paramref name="value"/> to script <paramref name="scriptName"/> of armor <paramref name="armor"/>
+        /// </summary>
+        /// <param name="armor">Armor setter to modify. Does not need to have existing VMAD</param>
+        /// <param name="scriptName">Name of script. Does not need to exist.</param>
+        /// <param name="propName">Name of property. Does not need to exist.</param>
+        /// <param name="value">New value of property</param>
+        /// <returns><c>true</c> if we changed the script at all, false otherwise</returns>
         public static bool AddScriptFloatProp(IArmor armor, string scriptName, string propName, float value)
         {
             bool modified = true;
@@ -59,10 +67,10 @@ namespace HO3Patcher
                 Data = value
             };
 
-            var HHSScripts = armor.VirtualMachineAdapter.Scripts.Where(script => script.Name.Equals(scriptName));
+            // Assume no duplicate scripts
+            var HHSScript = armor.VirtualMachineAdapter.Scripts.Find(script => script.Name.Equals(scriptName));
 
-            //if (!armor.VirtualMachineAdapter.Scripts.Any() || !armor.VirtualMachineAdapter.Scripts.Exists(script => script.Name.Equals("HHSOutfit3:HHSOutfit3")))
-            if (!HHSScripts.Any())
+            if (HHSScript == null)
             {
                 var newScript = new ScriptEntry
                 {
@@ -77,7 +85,6 @@ namespace HO3Patcher
             }
             else
             {
-                var HHSScript = HHSScripts.First();
                 var heightProp = HHSScript.Properties.Find(prop => prop.Name.Equals(propName));
 
                 if (heightProp == null)
@@ -116,8 +123,7 @@ namespace HO3Patcher
         /// <returns><c>true</c> if <paramref name="armor"/> has been modified, <c>false</c> otherwise.</returns>
         public static bool ApplyRuleToArmor(IArmor armor, HHSRules rule)
         {
-            bool modified = false;
-            modified = AddScriptFloatProp(armor, "HHSOutfit3:HHSOutfit3", "HHSHeight", rule.HHSHeight);
+            bool modified = AddScriptFloatProp(armor, "HHSOutfit3:HHSOutfit3", "HHSHeight", rule.HHSHeight);
             if (AddScriptFloatProp(armor, "HHSOutfit3:HHSOutfit3", "HHSHeight", rule.GroundClipAllowance))
             {
                 return true;
