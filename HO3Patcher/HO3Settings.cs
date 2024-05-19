@@ -28,13 +28,14 @@ namespace HO3Patcher
         [MaintainOrder]
         public int Priority = 0;
         [Tooltip("The rules that will determine which Armors will be patched")]
+        [MaintainOrder]
         public ArmorMatcher MatchingRules = new ArmorMatcher();
+        [Tooltip("High Heels offset (same as in the .txt)")]
+        [MaintainOrder]
         public float HHSHeight = 0;
+        [Tooltip("How much the heels are allowed to clip into the ground before there is any need to adjust scaling etc.")]
+        [MaintainOrder]
         public float GroundClipAllowance = 0;
-        /*[Tooltip("These Keywords will be added if not already present")]
-        public HashSet<IFormLinkGetter<IKeywordGetter>> KeywordsToAdd = new();
-        [Tooltip("These Keywords will be removed if present on the Armor")]
-        public HashSet<IFormLinkGetter<IKeywordGetter>> KeywordsToRemove = new();*/
     }
 
     public class ArmorMatcher

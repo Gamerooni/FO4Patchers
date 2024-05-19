@@ -1,20 +1,11 @@
 {
   "Nickname": "HO3Patcher",
   "Visibility": "Visible",
-  "OneLineDescription": "",
-  "LongDescription": "",
+  "OneLineDescription": "Patcher for HHSOutfits3",
+  "LongDescription": "Use Regex to find armors and set the values as desired. easy peasy.",
   "PreferredAutoVersioning": "Default",
-  "RequiredMods": [],
+  "RequiredMods": [ "HHSOutfit3.esl" ],
   "TargetedReleases": [
-    "Oblivion",
-    "SkyrimLE",
-    "SkyrimSE",
-    "SkyrimVR",
-    "Fallout4",
-    "EnderalLE",
-    "EnderalSE",
-    "SkyrimSEGog",
-    "Starfield",
-    "Fallout4VR"
+    "Fallout4"
   ]
 }
