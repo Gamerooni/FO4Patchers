@@ -244,6 +244,9 @@ namespace HO3Patcher
             foreach(var filePath in GetAllValidHHSFiles(state.DataFolderPath.RelativePath))
             {
                 Console.WriteLine(filePath);
+                Console.WriteLine(Path.GetRelativePath(state.DataFolderPath, filePath));
+                Console.WriteLine(Path.Combine("test", "testing", Path.GetRelativePath(state.DataFolderPath, filePath)));
+                Console.WriteLine(Path.Combine(state.DataFolderPath.Path, "test", "testing", Path.GetRelativePath(state.DataFolderPath, filePath)));
             }
 
             foreach (var armor in shortenedLoadOrder.WinningOverrides<IArmorGetter>())
