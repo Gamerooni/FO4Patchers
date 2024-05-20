@@ -202,11 +202,11 @@ namespace HO3Patcher
             return files.Where(file => IsHHSFileValid(file));
         }
 
-        public static void BackupFiles(IEnumerable<string> filePaths)
+        public static void BackupFiles(IEnumerable<string> relativeFilePaths)
         {
-            foreach (var filePath in filePaths)
+            foreach (var filePath in relativeFilePaths)
             {
-                File.Move(filePath, Path.Combine("Synthesis", "Misc", "HeelsBackup", filePath));
+                File.Copy(filePath, Path.Combine("Synthesis", "Misc", "HeelsBackup", filePath));
             }
         }
 
@@ -241,7 +241,7 @@ namespace HO3Patcher
 
             var linkCache = shortenedLoadOrder.ToImmutableLinkCache();
 
-            foreach(var filePath in GetAllValidHHSFiles(state.DataFolderPath.Path))
+            foreach(var filePath in GetAllValidHHSFiles(state.DataFolderPath.RelativePath))
             {
                 Console.WriteLine(filePath);
             }
