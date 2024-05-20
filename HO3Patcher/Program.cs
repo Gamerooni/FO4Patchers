@@ -272,6 +272,15 @@ namespace HO3Patcher
             //var allValidFiles = GetAllValidHHSFiles(state.DataFolderPath.RelativePath).Select(filePath => Path.GetRelativePath(state.DataFolderPath, filePath));
             var allRules = Settings.Rules.Concat(HHSFilesToRules(allValidFiles));
             Console.WriteLine($"We now got {allRules.Count()} rules");
+            List<string> allNifRules = allRules.Where(rule => rule.MatchingRules.AND).Select(rule => rule.MatchingRules.NifRegex).ToList();
+
+
+            Dictionary<string, HHSRules> exactNifMatches = new Dictionary<string, HHSRules>(allRules
+                .Where(rule => rule.MatchingRules.AND 
+                    && rule.MatchingRules.NifRegex.Length > 0 
+                    && rule.MatchingRules.NifRegex[0] == '^' 
+                    && rule.MatchingRules.NifRegex[rule.MatchingRules.NifRegex.Length - 1] == '$')
+                .Select(rule => new KeyValuePair<string, HHSRules>(rule.MatchingRules.NifRegex.Substring(1, rule.MatchingRules.NifRegex.Length - 2), rule)));
 
             Console.WriteLine("Files got");
 
