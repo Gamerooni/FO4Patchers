@@ -51,6 +51,8 @@ namespace HO3Patcher
         public string EditorIdRegex = string.Empty;
         [Tooltip("Regex by which to match an Armor's Display Name.")]
         public string DisplayNameRegex = string.Empty;
+        [Tooltip("Regex by which to match an Armor's .nif model file.")]
+        public string NifRegex = string.Empty;
     }
 
     /// <summary>
@@ -61,6 +63,7 @@ namespace HO3Patcher
         public Regex Keyword { get; }
         public Regex EditorId { get; }
         public Regex DisplayName { get; }
+        public Regex Nif { get; }
         public ILinkCache LinkCache { get; }
 
         public ArmorMatcherOperations(ArmorMatcher parent, ILinkCache linkCache)
@@ -69,11 +72,13 @@ namespace HO3Patcher
             EditorIdRegex = parent.EditorIdRegex;
             DisplayNameRegex = parent.DisplayNameRegex;
             ManualSelection = parent.ManualSelection;
+            NifRegex = parent.NifRegex;
             AND = parent.AND;
 
             Keyword = new Regex(KeywordRegex);
             EditorId = new Regex(EditorIdRegex);
             DisplayName = new Regex(DisplayNameRegex);
+            Nif = new Regex(NifRegex);
             LinkCache = linkCache;
         }
 
@@ -143,6 +148,25 @@ namespace HO3Patcher
             return null;
         }
 
+        public bool? MatchNif(IArmorGetter armor)
+        {
+            foreach (IArmorAddonModelGetter armorAddon in armor.Armatures)
+            {
+                var addon = armorAddon.AddonModel.TryResolve(LinkCache);
+                if (addon?.WorldModel == null || !addon.WorldModel.Any())
+                {
+                    continue;
+                }
+                if (addon
+                    .WorldModel
+                    .Where(model => model != null && Nif.IsMatch(Path.GetFileNameWithoutExtension(model.File) == null ? "" : Path.GetFileNameWithoutExtension(model.File)!)).Any())
+                {
+                    return true;
+                }
+            }
+            return AND ? false : null;
+        }
+
         /// <summary>
         /// Checks if <paramref name="armor"/> matches any of the rules defined in <see cref="ArmorMatcher"/>
         /// </summary>
@@ -154,6 +178,7 @@ namespace HO3Patcher
                 ?? MatchName((ops => ops.DisplayName), armor.Name?.String)
                 ?? MatchName((ops => ops.EditorId), armor.EditorID)
                 ?? MatchKeywords(armor)
+                ?? MatchNif(armor)
                 ?? false;
         }
     }
