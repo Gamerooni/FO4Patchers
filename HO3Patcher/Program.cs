@@ -81,7 +81,7 @@ namespace HO3Patcher
                         newHhsHeightProp
                     }
                 };
-                armor.VirtualMachineAdapter?.Scripts.Add(newScript);
+                armor.VirtualMachineAdapter.Scripts.Add(newScript);
             }
             else
             {
@@ -124,7 +124,7 @@ namespace HO3Patcher
         public static bool ApplyRuleToArmor(IArmor armor, HHSRules rule)
         {
             bool modified = AddScriptFloatProp(armor, "HHSOutfit3:HHSOutfit3", "HHSHeight", rule.HHSHeight);
-            if (AddScriptFloatProp(armor, "HHSOutfit3:HHSOutfit3", "HHSHeight", rule.GroundClipAllowance))
+            if (AddScriptFloatProp(armor, "HHSOutfit3:HHSOutfit3", "GroundClipAllowance", rule.GroundClipAllowance))
             {
                 return true;
             } else
