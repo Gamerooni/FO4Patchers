@@ -166,7 +166,10 @@ namespace HO3Patcher
                 if (line.IsNullOrWhitespace()) return false;
                 var splitLine = line.Split('=');
                 if (splitLine.Length != 2) return false;
-                if (splitLine[0].ToLower() == "height" && splitLine[1].IsNumeric()) return true;
+                if (splitLine[0].ToLower() == "height" && splitLine[1].IsNumeric())
+                {
+                    return true;
+                }
             }
             return false;
         }
@@ -185,7 +188,7 @@ namespace HO3Patcher
                 var line = reader.ReadLine();
                 height = float.Parse(line!.Split('=')[1]);
             }
-            HHSRules newRule = new HHSRules()
+            return new HHSRules()
             {
                 HHSHeight = height,
                 MatchingRules = new ArmorMatcher()
@@ -193,20 +196,29 @@ namespace HO3Patcher
                     NifRegex = $"^{fileName}$"
                 }
             };
-            return newRule;
+            //return newRule;
+        }
+
+        public static IEnumerable<HHSRules> HHSFilesToRules(IEnumerable<string> filePaths)
+        {
+            return filePaths.Select(filePath => HHSFileToRule(filePath));
         }
 
         public static IEnumerable<string> GetAllValidHHSFiles(string path)
         {
             var files = Directory.GetFiles(path, "*.txt", SearchOption.AllDirectories);
-            return files.Where(file => IsHHSFileValid(file));
+            Console.WriteLine("all the files:");
+            files.ForEach(file => Console.WriteLine(file));
+            Console.WriteLine(files.Length);
+            return files.Where(file => IsHHSFileValid(file)).ToList();
         }
 
-        public static void BackupFiles(IEnumerable<string> relativeFilePaths, string backupPath)
+        public static void MoveFiles(IEnumerable<string> relativeFilePaths, string backupPath, string gamePath)
         {
             foreach (var filePath in relativeFilePaths)
             {
-                File.Copy(filePath, Path.Combine(backupPath, filePath));
+                /*Console.WriteLine(Path.Combine(backupPath, filePath));*/
+                File.Move(Path.Combine(gamePath, filePath), Path.Combine(backupPath, filePath), overwrite:true);
             }
         }
 
@@ -216,11 +228,18 @@ namespace HO3Patcher
         /// <param name="armor">The Armor record to check</param>
         /// <param name="linkCache">Link cache to retrieve Keywords with</param>
         /// <returns>All rules which apply to <paramref name="armor"/>, ordered in ascending order by <see cref="KeywordRules.Priority"/></returns>
-        public static SortedList<int, HHSRules> GetAllRulesForArmor(IArmorGetter armor, ILinkCache linkCache)
+        public static SortedList<int, HHSRules> GetAllRulesForArmor(IArmorGetter armor, ILinkCache linkCache, IEnumerable<HHSRules> allRules)
         {
             var rules = new SortedList<int, HHSRules>();
-            foreach (var rule in Settings.Rules)
+            foreach (var rule in allRules)
             {
+                if (rule.MatchingRules.NifRegex == null)
+                {
+                    Console.WriteLine("no nifregex");
+                } else
+                {
+                    //Console.WriteLine($"NIF REGEX: {rule.MatchingRules.NifRegex}");
+                }
                 if (IsArmorMatchedBySetting(armor, rule.MatchingRules, linkCache))
                 {
                     rules[rule.Priority] = rule;
@@ -229,10 +248,10 @@ namespace HO3Patcher
             return rules;
         }
 
-        public static void ProcessArmor(IArmor armor, ILinkCache linkCache)
+        /*public static void ProcessArmor(IArmor armor, ILinkCache linkCache, IEnumerable<HHS>)
         {
             ApplyRulesToArmor(armor, GetAllRulesForArmor(armor, linkCache));
-        }
+        }*/
 
         public static void RunPatch(IPatcherState<IFallout4Mod, IFallout4ModGetter> state)
         {
@@ -241,25 +260,35 @@ namespace HO3Patcher
 
             var linkCache = shortenedLoadOrder.ToImmutableLinkCache();
 
-            /*foreach(var filePath in GetAllValidHHSFiles(state.DataFolderPath.RelativePath))
+            /*foreach(var filePath in GetAllValidHHSFiles(state.DataFolderPath.RelativePath).Select(filePath => Path.GetRelativePath(state.DataFolderPath, filePath)))
             {
                 Console.WriteLine(filePath);
-                Console.WriteLine(Path.GetRelativePath(state.DataFolderPath, filePath));
-                Console.WriteLine(Path.Combine("test", "testing", Path.GetRelativePath(state.DataFolderPath, filePath)));
-                Console.WriteLine(Path.Combine(state.DataFolderPath.Path, "test", "testing", Path.GetRelativePath(state.DataFolderPath, filePath)));
             }*/
 
-            BackupFiles(GetAllValidHHSFiles(state.DataFolderPath.RelativePath).Select(filePath => Path.GetRelativePath(state.DataFolderPath, filePath)), Path.Combine(state.ExtraSettingsDataPath!, "HeelsBackup"));
+
+            var f4seFiles = GetAllValidHHSFiles(Path.Join(state.DataFolderPath.RelativePath, "F4SE", "Plugins", "HHS"));
+            var meshFiles = GetAllValidHHSFiles(Path.Join(state.DataFolderPath.RelativePath, "Meshes"));
+            var allValidFiles = f4seFiles.Concat(meshFiles);
+            //var allValidFiles = GetAllValidHHSFiles(state.DataFolderPath.RelativePath).Select(filePath => Path.GetRelativePath(state.DataFolderPath, filePath));
+            var allRules = Settings.Rules.Concat(HHSFilesToRules(allValidFiles));
+            Console.WriteLine($"We now got {allRules.Count()} rules");
+
+            Console.WriteLine("Files got");
 
             foreach (var armor in shortenedLoadOrder.WinningOverrides<IArmorGetter>())
             {
-                var rules = GetAllRulesForArmor(armor, linkCache);
+                var rules = GetAllRulesForArmor(armor, linkCache, allRules);
                 var newArmor = armor.DeepCopy();
                 if (ApplyRulesToArmor(newArmor, rules))
                 {
+                    Console.WriteLine($"Applied rule to {newArmor.Name}");
                     state.PatchMod.Armors.Add(newArmor);
                 }
             }
+
+            Console.WriteLine("======Patch Completed-==========");
+
+            MoveFiles(allValidFiles, Path.Combine(state.DataFolderPath, "HeelsBackup"), state.DataFolderPath.RelativePath);
         }
     }
 }

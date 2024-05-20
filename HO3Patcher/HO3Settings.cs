@@ -174,11 +174,12 @@ namespace HO3Patcher
         /// <returns><c>true</c> if there is a match, <c>false</c> otherwise</returns>
         public bool MatchArmor(IArmorGetter armor)
         {
-            return MatchManual(armor)
+            return
+                MatchNif(armor)
+                ?? MatchManual(armor)
                 ?? MatchName((ops => ops.DisplayName), armor.Name?.String)
                 ?? MatchName((ops => ops.EditorId), armor.EditorID)
                 ?? MatchKeywords(armor)
-                ?? MatchNif(armor)
                 ?? false;
         }
     }
