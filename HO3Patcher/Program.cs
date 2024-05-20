@@ -241,7 +241,10 @@ namespace HO3Patcher
 
             var linkCache = shortenedLoadOrder.ToImmutableLinkCache();
 
-            Console.WriteLine(GetAllValidHHSFiles(state.DataFolderPath.Path));
+            foreach(var filePath in GetAllValidHHSFiles(state.DataFolderPath.Path))
+            {
+                Console.WriteLine(filePath);
+            }
 
             foreach (var armor in shortenedLoadOrder.WinningOverrides<IArmorGetter>())
             {
