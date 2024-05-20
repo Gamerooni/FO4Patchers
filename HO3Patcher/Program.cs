@@ -202,11 +202,11 @@ namespace HO3Patcher
             return files.Where(file => IsHHSFileValid(file));
         }
 
-        public static void BackupFiles(IEnumerable<string> relativeFilePaths)
+        public static void BackupFiles(IEnumerable<string> relativeFilePaths, string backupPath)
         {
             foreach (var filePath in relativeFilePaths)
             {
-                File.Copy(filePath, Path.Combine("Synthesis", "Misc", "HeelsBackup", filePath));
+                File.Copy(filePath, Path.Combine(backupPath, filePath));
             }
         }
 
@@ -241,13 +241,15 @@ namespace HO3Patcher
 
             var linkCache = shortenedLoadOrder.ToImmutableLinkCache();
 
-            foreach(var filePath in GetAllValidHHSFiles(state.DataFolderPath.RelativePath))
+            /*foreach(var filePath in GetAllValidHHSFiles(state.DataFolderPath.RelativePath))
             {
                 Console.WriteLine(filePath);
                 Console.WriteLine(Path.GetRelativePath(state.DataFolderPath, filePath));
                 Console.WriteLine(Path.Combine("test", "testing", Path.GetRelativePath(state.DataFolderPath, filePath)));
                 Console.WriteLine(Path.Combine(state.DataFolderPath.Path, "test", "testing", Path.GetRelativePath(state.DataFolderPath, filePath)));
-            }
+            }*/
+
+            BackupFiles(GetAllValidHHSFiles(state.DataFolderPath.RelativePath).Select(filePath => Path.GetRelativePath(state.DataFolderPath, filePath)), Path.Combine(state.ExtraSettingsDataPath!, "HeelsBackup"));
 
             foreach (var armor in shortenedLoadOrder.WinningOverrides<IArmorGetter>())
             {
