@@ -2,12 +2,7 @@ using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.WPF.Reflection.Attributes;
 using Mutagen.Bethesda.Fallout4;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using Mutagen.Bethesda;
 
 namespace HO3Patcher
@@ -174,11 +169,12 @@ namespace HO3Patcher
         /// <returns><c>true</c> if there is a match, <c>false</c> otherwise</returns>
         public bool MatchArmor(IArmorGetter armor)
         {
-            return MatchManual(armor)
+            return
+                MatchNif(armor)
+                ?? MatchManual(armor)
                 ?? MatchName((ops => ops.DisplayName), armor.Name?.String)
                 ?? MatchName((ops => ops.EditorId), armor.EditorID)
                 ?? MatchKeywords(armor)
-                ?? MatchNif(armor)
                 ?? false;
         }
     }
