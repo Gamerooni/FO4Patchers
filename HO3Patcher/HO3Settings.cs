@@ -79,7 +79,6 @@ namespace HO3Patcher
             EditorId = new Regex(EditorIdRegex);
             DisplayName = new Regex(DisplayNameRegex);
             Nif = new Regex(NifRegex);
-            //ExactNifMatches = exactNifMatches;
             LinkCache = linkCache;
         }
 

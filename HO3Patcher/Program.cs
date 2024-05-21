@@ -215,7 +215,7 @@ namespace HO3Patcher
         {
             foreach (var filePath in relativeFilePaths)
             {
-                File.Copy(Path.Combine(gamePath, filePath), Path.Combine(backupPath, filePath), overwrite:true);
+                File.Move(Path.Combine(gamePath, filePath), Path.Combine(backupPath, filePath), overwrite:true);
             }
         }
 
