@@ -215,7 +215,6 @@ namespace HO3Patcher
         {
             foreach (var filePath in relativeFilePaths)
             {
-                /*Console.WriteLine(Path.Combine(backupPath, filePath));*/
                 File.Copy(Path.Combine(gamePath, filePath), Path.Combine(backupPath, filePath), overwrite:true);
             }
         }
@@ -231,12 +230,6 @@ namespace HO3Patcher
             var rules = new SortedList<int, HHSRules>();
             foreach (var rule in allRules)
             {
-                if (rule.MatchingRules.NifRegex == null)
-                {
-                } else
-                {
-                    //Console.WriteLine($"NIF REGEX: {rule.MatchingRules.NifRegex}");
-                }
                 if (IsArmorMatchedBySetting(armor, rule.MatchingRules, linkCache))
                 {
                     rules[rule.Priority] = rule;
@@ -244,11 +237,6 @@ namespace HO3Patcher
             }
             return rules;
         }
-
-        /*public static void ProcessArmor(IArmor armor, ILinkCache linkCache, IEnumerable<HHS>)
-        {
-            ApplyRulesToArmor(armor, GetAllRulesForArmor(armor, linkCache));
-        }*/
 
         public static IEnumerable<HHSRules> FilterRulesByNif(IArmorGetter armor, IEnumerable<HHSRules> rules, Dictionary<string, HHSRules> exactNifRules, ILinkCache linkCache)
         {
@@ -271,15 +259,8 @@ namespace HO3Patcher
                         break;
                     }
                 }
-                /*if (addon
-                .WorldModel
-                    .Where(model => model != null && exactNifRules.TryGetValue(Path.GetFileNameWithoutExtension(model.File) == null ? "" : Path.GetFileNameWithoutExtension(model.File)!, out HHSRules value)))
-                {
-                    return true;
-                }*/
             }
             return filteredRules;
-            //return AND ? false : null;
         }
 
         public static void RunPatch(IPatcherState<IFallout4Mod, IFallout4ModGetter> state)
@@ -289,27 +270,14 @@ namespace HO3Patcher
 
             var linkCache = shortenedLoadOrder.ToImmutableLinkCache();
 
-            /*foreach(var filePath in GetAllValidHHSFiles(state.DataFolderPath.RelativePath).Select(filePath => Path.GetRelativePath(state.DataFolderPath, filePath)))
-            {
-                Console.WriteLine(filePath);
-            }*/
-
-
             var f4seFiles = GetAllValidHHSFiles(Path.Join(state.DataFolderPath.RelativePath, "F4SE", "Plugins", "HHS"));
             var meshFiles = GetAllValidHHSFiles(Path.Join(state.DataFolderPath.RelativePath, "Meshes"));
             var allValidFiles = f4seFiles.Concat(meshFiles);
-            //var allValidFiles = GetAllValidHHSFiles(state.DataFolderPath.RelativePath).Select(filePath => Path.GetRelativePath(state.DataFolderPath, filePath));
+
             var allRules = Settings.Rules.Concat(HHSFilesToRules(allValidFiles));
             Console.WriteLine($"We now got {allRules.Count()} rules");
             List<string> allNifRules = allRules.Where(rule => rule.MatchingRules.AND).Select(rule => rule.MatchingRules.NifRegex).ToList();
 
-
-            /*Dictionary<string, HHSRules> exactNifMatches = new Dictionary<string, HHSRules>(allRules
-                .Where(rule => rule.MatchingRules.AND 
-                    && rule.MatchingRules.NifRegex.Length > 0 
-                    && rule.MatchingRules.NifRegex[0] == '^' 
-                    && rule.MatchingRules.NifRegex[rule.MatchingRules.NifRegex.Length - 1] == '$')
-                .Select(rule => new KeyValuePair<string, HHSRules>(rule.MatchingRules.NifRegex.Substring(1, rule.MatchingRules.NifRegex.Length - 2), rule)));*/
             Dictionary<string, HHSRules> exactNifMatches = new Dictionary<string, HHSRules>();
             allRules
                 .Where(rule => rule.MatchingRules.AND

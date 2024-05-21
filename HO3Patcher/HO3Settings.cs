@@ -64,8 +64,7 @@ namespace HO3Patcher
         public Regex EditorId { get; }
         public Regex DisplayName { get; }
         public Regex Nif { get; }
-/*        public ISet<string>  ExactNifMatches { get; }
-*/        public ILinkCache LinkCache { get; }
+        public ILinkCache LinkCache { get; }
 
         public ArmorMatcherOperations(ArmorMatcher parent, ILinkCache linkCache)
         {
@@ -169,27 +168,6 @@ namespace HO3Patcher
             return AND ? false : null;
         }
 
-   /*     public bool? MatchNif(IArmorGetter armor)
-        {
-            foreach (IArmorAddonModelGetter armorAddon in armor.Armatures)
-            {
-                var addon = armorAddon.AddonModel.TryResolve(LinkCache);
-                if (addon?.WorldModel == null || !addon.WorldModel.Any())
-                {
-                    continue;
-                }
-                var modelFiles = addon.WorldModel
-                    .Where(model => model != null && Path.GetFileNameWithoutExtension(model.File) != null)
-                    .Select(model => Path.GetFileNameWithoutExtension(model!.File));
-                if (modelFiles.Intersect(ExactNifMatches).Any() 
-                    || modelFiles.Where(modelFile => Nif.IsMatch(Path.GetFileNameWithoutExtension(modelFile)!)).Any())
-                {
-                    return true;
-                }
-            }
-            return AND ? false : null;
-        }
-*/
         /// <summary>
         /// Checks if <paramref name="armor"/> matches any of the rules defined in <see cref="ArmorMatcher"/>
         /// </summary>
