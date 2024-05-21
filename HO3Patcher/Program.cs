@@ -303,9 +303,9 @@ namespace HO3Patcher
 
             Console.WriteLine("===========Patch Completed===========");
             Console.WriteLine($"{patchedCount} armours out of {allCount} patched");
-            Console.WriteLine("Moving files to \\HeelsBackup\\...");
+            /*Console.WriteLine("Moving files to \\HeelsBackup\\...");
             MoveFiles(allValidFiles.Select(file => Path.GetRelativePath(dataPath, file)), Path.Combine(dataPath, "HeelsBackup"), dataPath);
-            Console.WriteLine("Moved files to \\HeelsBackup\\!");
+            Console.WriteLine("Moved files to \\HeelsBackup\\!");*/
         }
     }
 }
