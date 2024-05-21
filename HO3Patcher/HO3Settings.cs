@@ -2,12 +2,7 @@ using Mutagen.Bethesda.Plugins.Cache;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.WPF.Reflection.Attributes;
 using Mutagen.Bethesda.Fallout4;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using Mutagen.Bethesda;
 
 namespace HO3Patcher

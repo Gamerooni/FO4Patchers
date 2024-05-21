@@ -2,14 +2,9 @@ using Mutagen.Bethesda;
 using Mutagen.Bethesda.Synthesis;
 using Mutagen.Bethesda.Fallout4;
 using Mutagen.Bethesda.Plugins.Cache;
-using Mutagen.Bethesda.Plugins;
 using Noggog;
-using System.Linq;
-using System.Runtime;
 using Mutagen.Bethesda.Plugins.Records;
 using System.Data;
-using System.Security.Policy;
-using Noggog.StructuredStrings.CSharp;
 
 namespace HO3Patcher
 {
@@ -238,7 +233,7 @@ namespace HO3Patcher
             return rules;
         }
 
-        public static IEnumerable<HHSRules> FilterRulesByNif(IArmorGetter armor, IEnumerable<HHSRules> rules, Dictionary<string, HHSRules> exactNifRules, ILinkCache linkCache)
+        public static IEnumerable<HHSRules> FilterRulesByNif(IArmorGetter armor, Dictionary<string, HHSRules> exactNifRules, ILinkCache linkCache)
         {
             List<HHSRules> filteredRules = new List<HHSRules>();
             foreach (IArmorAddonModelGetter armorAddon in armor.Armatures)
@@ -294,7 +289,7 @@ namespace HO3Patcher
             foreach (var armor in shortenedLoadOrder.WinningOverrides<IArmorGetter>())
             {
                 allCount++;
-                var rules = GetAllRulesForArmor(armor, linkCache, FilterRulesByNif(armor, allRules, exactNifMatches, linkCache));
+                var rules = GetAllRulesForArmor(armor, linkCache, FilterRulesByNif(armor, exactNifMatches, linkCache));
                 var newArmor = armor.DeepCopy();
                 if (ApplyRulesToArmor(newArmor, rules))
                 {
