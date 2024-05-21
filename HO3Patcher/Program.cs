@@ -9,6 +9,7 @@ using System.Runtime;
 using Mutagen.Bethesda.Plugins.Records;
 using System.Data;
 using System.Security.Policy;
+using Noggog.StructuredStrings.CSharp;
 
 namespace HO3Patcher
 {
@@ -193,6 +194,7 @@ namespace HO3Patcher
                 HHSHeight = height,
                 MatchingRules = new ArmorMatcher()
                 {
+                    AND = true,
                     NifRegex = $"^{fileName}$"
                 }
             };
@@ -218,7 +220,7 @@ namespace HO3Patcher
             foreach (var filePath in relativeFilePaths)
             {
                 /*Console.WriteLine(Path.Combine(backupPath, filePath));*/
-                File.Move(Path.Combine(gamePath, filePath), Path.Combine(backupPath, filePath), overwrite:true);
+                File.Copy(Path.Combine(gamePath, filePath), Path.Combine(backupPath, filePath), overwrite:true);
             }
         }
 
@@ -253,6 +255,39 @@ namespace HO3Patcher
             ApplyRulesToArmor(armor, GetAllRulesForArmor(armor, linkCache));
         }*/
 
+        public static IEnumerable<HHSRules> FilterRulesByNif(IArmorGetter armor, IEnumerable<HHSRules> rules, Dictionary<string, HHSRules> exactNifRules, ILinkCache linkCache)
+        {
+            List<HHSRules> filteredRules = new List<HHSRules>();
+            foreach (IArmorAddonModelGetter armorAddon in armor.Armatures)
+            {
+                var addon = armorAddon.AddonModel.TryResolve(linkCache);
+                if (addon?.WorldModel == null || !addon.WorldModel.Any())
+                {
+                    continue;
+                }
+                foreach(var model in addon.WorldModel)
+                {
+                    if (model == null) continue;
+                    var file = Path.GetFileNameWithoutExtension(model.File);
+                    Console.WriteLine($"Processing this file: {file}");
+                    if (file.IsNullOrWhitespace()) continue;
+                    if (exactNifRules.TryGetValue(file, out var rule))
+                    {
+                        filteredRules.Add(rule);
+                        break;
+                    }
+                }
+                /*if (addon
+                .WorldModel
+                    .Where(model => model != null && exactNifRules.TryGetValue(Path.GetFileNameWithoutExtension(model.File) == null ? "" : Path.GetFileNameWithoutExtension(model.File)!, out HHSRules value)))
+                {
+                    return true;
+                }*/
+            }
+            return filteredRules;
+            //return AND ? false : null;
+        }
+
         public static void RunPatch(IPatcherState<IFallout4Mod, IFallout4ModGetter> state)
         {
             var shortenedLoadOrder = Settings.ModsToPatch.Any() ? state.LoadOrder.PriorityOrder
@@ -275,18 +310,28 @@ namespace HO3Patcher
             List<string> allNifRules = allRules.Where(rule => rule.MatchingRules.AND).Select(rule => rule.MatchingRules.NifRegex).ToList();
 
 
-            Dictionary<string, HHSRules> exactNifMatches = new Dictionary<string, HHSRules>(allRules
+            /*Dictionary<string, HHSRules> exactNifMatches = new Dictionary<string, HHSRules>(allRules
                 .Where(rule => rule.MatchingRules.AND 
                     && rule.MatchingRules.NifRegex.Length > 0 
                     && rule.MatchingRules.NifRegex[0] == '^' 
                     && rule.MatchingRules.NifRegex[rule.MatchingRules.NifRegex.Length - 1] == '$')
-                .Select(rule => new KeyValuePair<string, HHSRules>(rule.MatchingRules.NifRegex.Substring(1, rule.MatchingRules.NifRegex.Length - 2), rule)));
-
+                .Select(rule => new KeyValuePair<string, HHSRules>(rule.MatchingRules.NifRegex.Substring(1, rule.MatchingRules.NifRegex.Length - 2), rule)));*/
+            Dictionary<string, HHSRules> exactNifMatches = new Dictionary<string, HHSRules>();
+            allRules
+                .Where(rule => rule.MatchingRules.AND
+                    && rule.MatchingRules.NifRegex.Length > 0
+                    && rule.MatchingRules.NifRegex[0] == '^'
+                    && rule.MatchingRules.NifRegex[rule.MatchingRules.NifRegex.Length - 1] == '$')
+                .ForEach(rule => exactNifMatches[rule.MatchingRules.NifRegex.Substring(1, rule.MatchingRules.NifRegex.Length - 2)] = rule);
+            Console.WriteLine($"Filtered this many exact matches: {exactNifMatches.Count}");
             Console.WriteLine("Files got");
+
+            exactNifMatches.ForEach(match => Console.WriteLine(match.Key));
 
             foreach (var armor in shortenedLoadOrder.WinningOverrides<IArmorGetter>())
             {
-                var rules = GetAllRulesForArmor(armor, linkCache, allRules);
+                //var rules = GetAllRulesForArmor(armor, linkCache, allRules);
+                var rules = GetAllRulesForArmor(armor, linkCache, FilterRulesByNif(armor, allRules, exactNifMatches, linkCache));
                 var newArmor = armor.DeepCopy();
                 if (ApplyRulesToArmor(newArmor, rules))
                 {
