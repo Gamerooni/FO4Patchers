@@ -265,8 +265,10 @@ namespace HO3Patcher
 
             var linkCache = shortenedLoadOrder.ToImmutableLinkCache();
 
-            var f4seFiles = GetAllValidHHSFiles(Path.Join(state.DataFolderPath.RelativePath, "F4SE", "Plugins", "HHS"));
-            var meshFiles = GetAllValidHHSFiles(Path.Join(state.DataFolderPath.RelativePath, "Meshes"));
+            string dataPath = state.DataFolderPath.RelativePath;
+
+            var f4seFiles = GetAllValidHHSFiles(Path.Join(dataPath, "F4SE", "Plugins", "HHS"));
+            var meshFiles = GetAllValidHHSFiles(Path.Join(dataPath, "Meshes"));
             var allValidFiles = f4seFiles.Concat(meshFiles);
 
             var allRules = Settings.Rules.Concat(HHSFilesToRules(allValidFiles));
@@ -302,7 +304,7 @@ namespace HO3Patcher
             Console.WriteLine("===========Patch Completed===========");
             Console.WriteLine($"{patchedCount} armours out of {allCount} patched");
             Console.WriteLine("Moving files to \\HeelsBackup\\...");
-            MoveFiles(allValidFiles, Path.Combine(state.DataFolderPath, "HeelsBackup"), state.DataFolderPath.RelativePath);
+            MoveFiles(allValidFiles.Select(file => Path.GetRelativePath(dataPath, file)), Path.Combine(dataPath, "HeelsBackup"), dataPath);
             Console.WriteLine("Moved files to \\HeelsBackup\\!");
         }
     }
