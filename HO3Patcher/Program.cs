@@ -198,7 +198,6 @@ namespace HO3Patcher
                     NifRegex = $"^{fileName}$"
                 }
             };
-            //return newRule;
         }
 
         public static IEnumerable<HHSRules> HHSFilesToRules(IEnumerable<string> filePaths)
@@ -209,9 +208,6 @@ namespace HO3Patcher
         public static IEnumerable<string> GetAllValidHHSFiles(string path)
         {
             var files = Directory.GetFiles(path, "*.txt", SearchOption.AllDirectories);
-            Console.WriteLine("all the files:");
-            files.ForEach(file => Console.WriteLine(file));
-            Console.WriteLine(files.Length);
             return files.Where(file => IsHHSFileValid(file)).ToList();
         }
 
@@ -237,7 +233,6 @@ namespace HO3Patcher
             {
                 if (rule.MatchingRules.NifRegex == null)
                 {
-                    Console.WriteLine("no nifregex");
                 } else
                 {
                     //Console.WriteLine($"NIF REGEX: {rule.MatchingRules.NifRegex}");
@@ -269,7 +264,6 @@ namespace HO3Patcher
                 {
                     if (model == null) continue;
                     var file = Path.GetFileNameWithoutExtension(model.File);
-                    Console.WriteLine($"Processing this file: {file}");
                     if (file.IsNullOrWhitespace()) continue;
                     if (exactNifRules.TryGetValue(file, out var rule))
                     {
@@ -323,26 +317,30 @@ namespace HO3Patcher
                     && rule.MatchingRules.NifRegex[0] == '^'
                     && rule.MatchingRules.NifRegex[rule.MatchingRules.NifRegex.Length - 1] == '$')
                 .ForEach(rule => exactNifMatches[rule.MatchingRules.NifRegex.Substring(1, rule.MatchingRules.NifRegex.Length - 2)] = rule);
-            Console.WriteLine($"Filtered this many exact matches: {exactNifMatches.Count}");
-            Console.WriteLine("Files got");
+            Console.WriteLine("----------Files read----------");
+            Console.WriteLine($"Filtered this many exact .nif matches: {exactNifMatches.Count}");
 
-            exactNifMatches.ForEach(match => Console.WriteLine(match.Key));
+            var allCount = 0;
+            var patchedCount = 0;
 
             foreach (var armor in shortenedLoadOrder.WinningOverrides<IArmorGetter>())
             {
-                //var rules = GetAllRulesForArmor(armor, linkCache, allRules);
+                allCount++;
                 var rules = GetAllRulesForArmor(armor, linkCache, FilterRulesByNif(armor, allRules, exactNifMatches, linkCache));
                 var newArmor = armor.DeepCopy();
                 if (ApplyRulesToArmor(newArmor, rules))
                 {
                     Console.WriteLine($"Applied rule to {newArmor.Name}");
+                    patchedCount++;
                     state.PatchMod.Armors.Add(newArmor);
                 }
             }
 
-            Console.WriteLine("======Patch Completed-==========");
-
+            Console.WriteLine("===========Patch Completed===========");
+            Console.WriteLine($"{patchedCount} armours out of {allCount} patched");
+            Console.WriteLine("Moving files to \\HeelsBackup\\...");
             MoveFiles(allValidFiles, Path.Combine(state.DataFolderPath, "HeelsBackup"), state.DataFolderPath.RelativePath);
+            Console.WriteLine("Moved files to \\HeelsBackup\\!");
         }
     }
 }
