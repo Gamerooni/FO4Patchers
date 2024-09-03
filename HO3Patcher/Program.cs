@@ -186,7 +186,7 @@ namespace HO3Patcher
             }
             return new HHSRules()
             {
-                HHSHeight = height,
+                HHSHeight = height/10,
                 MatchingRules = new ArmorMatcher()
                 {
                     AND = true,
