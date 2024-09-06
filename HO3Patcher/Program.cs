@@ -5,6 +5,7 @@ using Mutagen.Bethesda.Plugins.Cache;
 using Noggog;
 using Mutagen.Bethesda.Plugins.Records;
 using System.Data;
+using System.Net.Http.Json;
 
 namespace HO3Patcher
 {
@@ -184,6 +185,7 @@ namespace HO3Patcher
                 var line = reader.ReadLine();
                 height = float.Parse(line!.Split('=')[1]);
             }
+            Console.WriteLine($"File {filePath} has parsed height {height}");
             return new HHSRules()
             {
                 HHSHeight = height,
@@ -303,9 +305,12 @@ namespace HO3Patcher
 
             Console.WriteLine("===========Patch Completed===========");
             Console.WriteLine($"{patchedCount} armours out of {allCount} patched");
-            /*Console.WriteLine("Moving files to \\HeelsBackup\\...");
-            MoveFiles(allValidFiles.Select(file => Path.GetRelativePath(dataPath, file)), Path.Combine(dataPath, "HeelsBackup"), dataPath);
-            Console.WriteLine("Moved files to \\HeelsBackup\\!");*/
+            if (Settings.MoveFiles)
+            {
+                Console.WriteLine("Moving files to \\HeelsBackup\\...");
+                MoveFiles(allValidFiles.Select(file => Path.GetRelativePath(dataPath, file)), Path.Combine(dataPath, "HeelsBackup"), dataPath);
+                Console.WriteLine("Moved files to \\HeelsBackup\\!");
+            }
         }
     }
 }

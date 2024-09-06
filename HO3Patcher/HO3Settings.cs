@@ -15,6 +15,9 @@ namespace HO3Patcher
         [Tooltip("These rules will be applied to each Armor")]
         [MaintainOrder]
         public List<HHSRules> Rules = new List<HHSRules>();
+        [Tooltip("Move the old config files into a backup directory")]
+        [MaintainOrder]
+        public bool MoveFiles = true;
     }
 
     public class HHSRules
